@@ -10,6 +10,8 @@ def analyze_csv(file_content: bytes):
     missing_values = df.isnull().sum()
     duplicate_rows = int(df.duplicated().sum())
 
+    quality = calculate_data_quality(df, duplicate_rows)
+
     columns = []
 
     for column in df.columns:
@@ -33,7 +35,7 @@ def analyze_csv(file_content: bytes):
             ),
             "unique_values": int(series.nunique()),
             "column_type": "numeric" if is_numeric else "categorical",
-            "statistics": statistics
+            "statistics": statistics,
         })
 
     preview = df.head(10).fillna("").astype(str).to_dict(orient = "records")
@@ -47,7 +49,8 @@ def analyze_csv(file_content: bytes):
             "total_missing_values": int(missing_values.sum()),
         },
         "columns": columns,
-        "preview": preview
+        "preview": preview,
+        "data_quality": quality,
     }
 
 
@@ -94,3 +97,44 @@ def analyzee_categorical_column(series: pd.Series):
         ],
     }
 
+def calculate_data_quality(df: pd.DataFrame, duplicate_rows: int):
+    total_rows, total_columns = df.shape
+    total_cells = total_rows * total_columns
+
+    if total_cells == 0:
+        return {
+            "score": 0,
+            "rating": "No data",
+            "complements": 0,
+            "uniqueness": 0,
+            "missing_percentage": 0,
+            "duplicate_percentage": 0,
+        }
+
+    missing_cells = int(df.isnull().sum().sum())
+
+    completeness = ( 1 - missing_cells / total_cells ) * 100
+
+    duplicate_percentage = ( duplicate_rows / total_rows ) * 100 if total_rows else 0
+
+    uniqueness = 100 - duplicate_percentage
+
+    score = round( completeness * 0.6 + uniqueness * 0.4, 2 )
+
+    if score >= 90:
+        rating = "Excellent"
+    elif score >= 75:
+        rating = "Good"
+    elif score >= 50:
+        rating = "Fair"
+    else:
+        rating = "Poor"
+
+    return {
+        "score": score,
+        "rating": rating,
+        "completeness": round(completeness, 2),
+        "uniqueness": round(uniqueness, 2),
+        "missing_percentage": round(missing_cells / total_cells * 100, 2),
+        "duplicate_percentage": round(duplicate_percentage, 2)
+    }
