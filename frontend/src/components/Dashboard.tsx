@@ -3,7 +3,17 @@ import { Database, Rows3, Columns3, Copy, Activity } from "lucide-react";
 import { analyzeCSV } from "../services/analysis.service";
 import type { AnalysisResult } from "../types/analysis.types";
 import FileUpload from "./FileUpload";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import '../index.css';
+
+AOS.init({
+    duration: 700,
+    easing: "ease-in-out-cubic",
+    once: true,
+    offset: 80,
+    delay: 0,
+})
 
 const Dashboard = () => {
     const [data, setData] = useState<AnalysisResult | null>(null);
@@ -52,83 +62,83 @@ const Dashboard = () => {
 
     return (
         <main className="min-h-screen bg-[#090d16] p-6 text-slate-200 md:p-10">
-            <div className="mx-auto max-w-7xl space-y-8">
+            <div data-aos="zoom-in-up" className="mx-auto max-w-7xl space-y-8">
 
-                <header className="flex items-center gap-3">
-                    <div className="rounded-lg bg-green-500/10 p-3 text-green-400">
-                        <Activity size={25} />
+                <header className="flex items-center gap-6">
+                    <div className="rounded-lg bg-green-500/10 p-6 text-green-400">
+                        <Activity size={28} />
                     </div>
 
                     <div>
-                        <h1 className="text-2xl font-bold text-white">BeatCSV</h1>
-                        <p className="text-sm text-slate-400">
+                        <h1 className="text-4xl font-bold text-white">BeatCSV</h1>
+                        <p className="text-lg text-slate-400">
                             CSV Data Profiling & Quality Analysis
                         </p>
                     </div>
                 </header>
 
-                <div className="grid grid-cols-2 gap-8">
+                <section className="w-full">
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                        <div className="overflow-auto max-h-125 custom-scrollbar">
-                            <table className="w-full text-left text-sm text-slate-300">
-                                <thead className="sticky top-0 z-10 bg-slate-800/95 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                                    <tr>
-                                        {Object.keys(data?.preview[0] ?? {}).map((column) => (
-                                            <th key={column} className="p-4 whitespace-nowrap">
-                                                {column}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
+                    <FileUpload onUpload={handleUpload} loading={loading} />
 
-                                <tbody className="divide-y divide-slate-800/60">
-                                    {data?.preview.length ? (
-                                        data.preview.map((row, index) => (
-                                            <tr
-                                                key={index}
-                                                className="hover:bg-slate-800/30 transition-colors"
-                                            >
-                                                {Object.values(row).map((value, cellIndex) => (
-                                                    <td
-                                                        key={cellIndex}
-                                                        className="p-4 whitespace-nowrap"
-                                                    >
-                                                        {value === "" ? (
-                                                            <span className="text-slate-500 italic">
-                                                                Missing
-                                                            </span>
-                                                        ) : (
-                                                            value
-                                                        )}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={Object.keys(data?.preview[0] ?? {}).length || 1}
-                                                className="p-8 text-center text-slate-400"
-                                            >
-                                                No file uploaded
-                                            </td>
+                    {error && (
+                        <p className="mt-3 text-sm text-red-400">{error}</p>
+                    )}
+                </section>
+
+                <div>
+                    <h2 data-aos="zoom-in-up" className="font-semibold text-white">Data preview</h2>
+                </div>
+
+                <div data-aos="zoom-in-up" className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div className="overflow-auto max-h-125 custom-scrollbar">
+                        <table className="w-full text-left text-sm text-slate-300">
+                            <thead className="sticky top-0 z-10 bg-slate-800/95 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    {Object.keys(data?.preview[0] ?? {}).map((column) => (
+                                        <th key={column} className="p-4 whitespace-nowrap">
+                                            {column}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+
+                            <tbody className="divide-y divide-slate-800/60">
+                                {data?.preview.length ? (
+                                    data.preview.map((row, index) => (
+                                        <tr
+                                            key={index}
+                                            className="hover:bg-slate-800/30 transition-colors"
+                                        >
+                                            {Object.values(row).map((value, cellIndex) => (
+                                                <td
+                                                    key={cellIndex}
+                                                    className="p-4 whitespace-nowrap"
+                                                >
+                                                    {value === "" ? (
+                                                        <span className="text-slate-500 italic">
+                                                            Missing
+                                                        </span>
+                                                    ) : (
+                                                        value
+                                                    )}
+                                                </td>
+                                            ))}
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan={Object.keys(data?.preview[0] ?? {}).length || 1}
+                                            className="p-8 text-center text-slate-400"
+                                        >
+                                            No file uploaded
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-
-                    <section className="w-full">
-
-                        <FileUpload onUpload={handleUpload} loading={loading} />
-
-                        {error && (
-                            <p className="mt-3 text-sm text-red-400">{error}</p>
-                        )}
-                    </section>
-
                 </div>
 
                 {data && (
@@ -143,6 +153,7 @@ const Dashboard = () => {
                                 {metrics.map((metric) => (
                                     <div
                                         key={metric.label}
+                                        data-aos="fade-right"
                                         className="rounded-xl border border-slate-800 bg-slate-900 p-5"
                                     >
                                         <metric.icon className="mb-4 text-green-400" size={22} />
@@ -155,7 +166,7 @@ const Dashboard = () => {
                             </div>
                         </section>
 
-                        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+                        <section data-aos="fade-right" className="rounded-xl border border-slate-800 bg-slate-900 p-6">
                             <h2 className="font-semibold text-white">Data Quality Score</h2>
 
                             <div className="mt-5 flex items-center justify-between">
@@ -192,7 +203,7 @@ const Dashboard = () => {
                             </div>
                         </section>
 
-                        <section className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900 p-6">
+                        <section data-aos="fade-right" className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900 p-6">
                             <h2 className="mb-5 font-semibold text-white">Column Analysis</h2>
 
                             <table className="w-full text-left text-sm">
