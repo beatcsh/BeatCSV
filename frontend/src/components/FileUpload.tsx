@@ -23,7 +23,7 @@ const FileUpload = ({ onUpload, loading }: FileUploadProps) => {
                 handleFile(e.dataTransfer.files[0]);
             }}
             onClick={() => inputRef.current?.click()}
-            className="cursor-pointer rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-10 text-center transition hover:border-green-500 hover:bg-slate-800/60"
+            className="h-125 flex flex-col justify-center cursor-pointer rounded-xl border border-slate-700 bg-slate-900/60 p-10 text-center transition hover:border-green-500 hover:bg-slate-800/60"
         >
             <input
                 ref={inputRef}

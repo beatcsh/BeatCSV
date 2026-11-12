@@ -3,6 +3,7 @@ import { Database, Rows3, Columns3, Copy, Activity } from "lucide-react";
 import { analyzeCSV } from "../services/analysis.service";
 import type { AnalysisResult } from "../types/analysis.types";
 import FileUpload from "./FileUpload";
+import '../index.css';
 
 const Dashboard = () => {
     const [data, setData] = useState<AnalysisResult | null>(null);
@@ -66,17 +67,69 @@ const Dashboard = () => {
                     </div>
                 </header>
 
-                <section className="w-[50%]">
-                    <h2 className="mb-4 text-lg font-semibold text-white">
-                        Dataset Upload
-                    </h2>
+                <div className="grid grid-cols-2 gap-8">
 
-                    <FileUpload onUpload={handleUpload} loading={loading} />
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                        <div className="overflow-auto max-h-125 custom-scrollbar">
+                            <table className="w-full text-left text-sm text-slate-300">
+                                <thead className="sticky top-0 z-10 bg-slate-800/95 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <tr>
+                                        {Object.keys(data?.preview[0] ?? {}).map((column) => (
+                                            <th key={column} className="p-4 whitespace-nowrap">
+                                                {column}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
 
-                    {error && (
-                        <p className="mt-3 text-sm text-red-400">{error}</p>
-                    )}
-                </section>
+                                <tbody className="divide-y divide-slate-800/60">
+                                    {data?.preview.length ? (
+                                        data.preview.map((row, index) => (
+                                            <tr
+                                                key={index}
+                                                className="hover:bg-slate-800/30 transition-colors"
+                                            >
+                                                {Object.values(row).map((value, cellIndex) => (
+                                                    <td
+                                                        key={cellIndex}
+                                                        className="p-4 whitespace-nowrap"
+                                                    >
+                                                        {value === "" ? (
+                                                            <span className="text-slate-500 italic">
+                                                                Missing
+                                                            </span>
+                                                        ) : (
+                                                            value
+                                                        )}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td
+                                                colSpan={Object.keys(data?.preview[0] ?? {}).length || 1}
+                                                className="p-8 text-center text-slate-400"
+                                            >
+                                                No file uploaded
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <section className="w-full">
+
+                        <FileUpload onUpload={handleUpload} loading={loading} />
+
+                        {error && (
+                            <p className="mt-3 text-sm text-red-400">{error}</p>
+                        )}
+                    </section>
+
+                </div>
 
                 {data && (
                     <>
